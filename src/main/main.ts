@@ -6,6 +6,8 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { shellModule } from './IpsModule/shellModule';
 import { pythonModule } from './IpsModule/pythonModule';
+import { databaseModule } from './IpsModule/databaseModule';
+import { sequelize } from './database/connect';
 
 class AppUpdater {
   constructor() {
@@ -68,6 +70,7 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
+  await sequelize.sync();
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -82,6 +85,7 @@ const createWindow = async () => {
 
   shellModule(ipcMain);
   pythonModule(ipcMain);
+  databaseModule(ipcMain);
 
   mainWindow.on('closed', () => {
     mainWindow = null;

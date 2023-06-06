@@ -14,13 +14,7 @@ const runPythonScript = (config: ConfigOrder) => {
     let output: string[];
 
     pythonProcess.stdout.on('data', (data) => {
-      //   let dataLines = data.toString().split('\r\n');
       output = data.toString();
-
-      // console.log(dataLines);
-      // const parsedData = JSON.parse(dataLines);
-      //   console.log(parsedData);
-      // output = dataLines.slice(1, dataLines.length - 1);
     });
 
     pythonProcess.stderr.on('data', (data) => {

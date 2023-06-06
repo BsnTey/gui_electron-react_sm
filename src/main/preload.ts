@@ -4,7 +4,9 @@ export type Channels =
   | 'open-file'
   | 'delete-file'
   | 'run-python-script-output'
-  | 'run-python-script';
+  | 'run-python-script'
+  | 'get-proxys'
+  | 'update-proxy';
 
 export type ConfigOrder = {
   countWorks: number;
@@ -31,6 +33,16 @@ const electronHandler = {
         .invoke(channel, config)
         .then((response) => {
           return response;
+        })
+        .catch((error) => {
+          throw error;
+        });
+    },
+    proxy(channel: Channels, path: string) {
+      return ipcRenderer
+        .invoke(channel, path)
+        .then(() => {
+          return true;
         })
         .catch((error) => {
           throw error;

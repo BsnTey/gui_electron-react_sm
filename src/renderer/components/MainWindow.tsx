@@ -21,21 +21,17 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
   useDisclosure,
+  useToast,
 } from '@chakra-ui/react';
 
 import ModalException from './ModalException';
 import React from 'react';
+import { MenuSettings } from './MenuSettings';
 
 const MainWindow = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [errorMessage, setErrorMessage] = React.useState();
-
-  const handleClick = () => {
-    window.electron.ipcRenderer.actionFile(
-      'open-file',
-      'C:\\Users\\kiril\\Desktop\\SM\\proxy.txt'
-    );
-  };
+  const toast = useToast();
 
   const handleRunScript = async () => {
     window.electron.ipcRenderer
@@ -45,11 +41,18 @@ const MainWindow = () => {
         useProxy: true,
       })
       .then((response) => {
-        console.log(response);
         const serializedObj = JSON.parse(response);
         if (serializedObj.result === false) {
           onOpen();
           setErrorMessage(serializedObj.number);
+        } else {
+          toast({
+            title: 'Выполнено успешно',
+            // description: "We've created your account for you.",
+            status: 'success',
+            duration: 9000,
+            isClosable: true,
+          });
         }
       })
       .catch((error) => {
@@ -60,6 +63,7 @@ const MainWindow = () => {
   return (
     <>
       <ModalException isOpen={isOpen} onClose={onClose} text={errorMessage} />
+      <MenuSettings />
       <Tabs isFitted variant="enclosed">
         <TabList mb="1em">
           <Tab>Заказы</Tab>
@@ -84,8 +88,6 @@ const MainWindow = () => {
                 <FormLabel>Количество потоков</FormLabel>
                 <NumberInput min={1} defaultValue={1}>
                   <NumberInputField />
-                  {/* <Button onClick={() => onOpen()}>Открыть</Button> */}
-                  {/* <Button></Button> */}
                   <NumberInputStepper>
                     <NumberIncrementStepper />
                     <NumberDecrementStepper />
@@ -101,7 +103,6 @@ const MainWindow = () => {
                     <Radio value="2">Нет</Radio>
                   </Stack>
                 </RadioGroup>
-                <Button onClick={handleClick}>Открыть</Button>
               </Flex>
 
               <Button
