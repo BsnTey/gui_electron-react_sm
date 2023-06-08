@@ -6,4 +6,16 @@ export class CartOut extends Model {
     type: DataType.STRING,
   })
   deviceId!: string;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+  })
+  createdAt!: string;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+  })
+  updatedAt!: string;
 }

@@ -1,4 +1,9 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import {
+  contextBridge,
+  ipcRenderer,
+  ipcMain,
+  IpcRendererEvent,
+} from 'electron';
 
 export type Channels =
   | 'open-file'
@@ -6,6 +11,9 @@ export type Channels =
   | 'run-python-script-output'
   | 'run-python-script'
   | 'get-proxys'
+  | 'update-progress'
+  | 'update-input-accounts'
+  | 'get-cart-accounts'
   | 'update-proxy';
 
 export type ConfigOrder = {
@@ -38,15 +46,36 @@ const electronHandler = {
           throw error;
         });
     },
-    proxy(channel: Channels, path: string) {
+    invokePost(channel: Channels, payload: string) {
       return ipcRenderer
-        .invoke(channel, path)
+        .invoke(channel, payload)
         .then(() => {
           return true;
         })
         .catch((error) => {
           throw error;
         });
+    },
+    invokeGet(channel: Channels) {
+      return ipcRenderer
+        .invoke(channel)
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          throw error;
+        });
+    },
+    sendMessage(channel: Channels, callback: (...args: unknown[]) => void) {
+      ipcRenderer.on(
+        channel,
+        (_event: IpcRendererEvent, ...args: unknown[]) => {
+          callback(...args);
+        }
+      );
+    },
+    removeListener(channel: Channels, callback: (...args: unknown[]) => void) {
+      ipcRenderer.removeListener(channel, callback);
     },
   },
 };

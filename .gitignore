@@ -30,3 +30,6 @@ npm-debug.log.*
 
 error_files
 .env
+
+config
+migrations
