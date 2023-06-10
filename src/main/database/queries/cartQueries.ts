@@ -1,4 +1,5 @@
 import { Proxy } from '../models/proxy.entity';
+import { AccountSportmaster } from '../models/accounts.entity';
 import { CartIn } from '../models/createCart/in.entity';
 import { CartOut } from '../models/createCart/out.entity';
 import { sequelize } from '../connect';
@@ -23,12 +24,84 @@ export const getRandomProxy = async () => {
   }
 };
 
-export const getCartAccounts = async () => {
+export const getCartOutputAccounts = async () => {
   try {
     const accounts = await CartOut.findAll();
     return accounts;
   } catch (error) {
-    console.error('Error while retrieving proxies:', error);
+    console.error('Error while retrieving accounts:', error);
+    throw error;
+  }
+};
+
+export const getCartInputAccounts = async () => {
+  try {
+    const accounts = await CartIn.findAll();
+    return accounts;
+  } catch (error) {
+    console.error('Error while retrieving accounts:', error);
+    throw error;
+  }
+};
+
+export const addCartInputAccounts = async (deviceId: string) => {
+  try {
+    await CartIn.create({
+      deviceId,
+    });
+  } catch (error) {
+    console.error('Error while retrieving account:', error);
+    throw error;
+  }
+};
+
+export const addCartOutputAccounts = async (deviceId: string) => {
+  try {
+    await CartOut.create({
+      deviceId,
+    });
+  } catch (error) {
+    console.error('Error while retrieving account:', error);
+    throw error;
+  }
+};
+
+export const getAccountForWork = async () => {
+  let transaction;
+  try {
+    transaction = await sequelize.transaction();
+    const account = await CartIn.findOne({
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    }); // Берём первую запись и блокируем её для других транзакций
+
+    if (!account) throw new Error('No account available');
+
+    await account.destroy({ transaction }); // Удаляем запись в рамках той же транзакции
+
+    await transaction.commit(); // Подтверждаем транзакцию
+
+    return account.deviceId; // Возвращаем данные из ячейки deviceId
+  } catch (error) {
+    if (transaction) await transaction.rollback();
+    console.error('Error while retrieving account:', error);
+    throw error;
+  }
+};
+
+export const getDataAccount = async (deviceId: string) => {
+  try {
+    const account = await AccountSportmaster.findOne({
+      where: { deviceId },
+      attributes: ['cookie'],
+    });
+    if (!account) {
+      throw new Error(`Account with deviceId ${deviceId} not found`);
+    }
+
+    return account.cookie;
+  } catch (error) {
+    console.error('Error while retrieving account:', error);
     throw error;
   }
 };

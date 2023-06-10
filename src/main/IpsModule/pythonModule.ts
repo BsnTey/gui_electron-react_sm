@@ -1,6 +1,12 @@
 import { IpcMain } from 'electron';
 import { spawn } from 'child_process';
-import { getRandomProxy } from '../database/queries/cartQueries';
+import {
+  getRandomProxy,
+  getAccountForWork,
+  getDataAccount,
+  addCartInputAccounts,
+  addCartOutputAccounts,
+} from '../database/queries/cartQueries';
 
 const pythonScriptPath = 'C:\\Users\\kiril\\Desktop\\SM\\Auto_Cart\\main.py';
 const pythonExe =
@@ -12,9 +18,10 @@ const getProxy = async () => {
   return proxy;
 };
 
-const runPythonScript = (proxy: string, event: any) => {
+const runPythonScript = (proxy: string, cookie: string, event: any) => {
   return new Promise((resolve, reject) => {
-    const pythonProcess = spawn(pythonExe, [pythonScriptPath, proxy]);
+    cookie = cookie.slice(1, -1);
+    const pythonProcess = spawn(pythonExe, [pythonScriptPath, proxy, cookie]);
 
     let output: string[];
 
@@ -50,14 +57,32 @@ export const pythonModule = (ipcMain: IpcMain) => {
           tasks.length < config.countThreads &&
           worksCompleted + tasks.length < config.countWorks
         ) {
-          let proxy = config.useProxy ? await getProxy() : '';
-          const task = runPythonScript(proxy, event).finally(() => {
-            worksCompleted++;
-            const index = tasks.indexOf(task);
-            if (index > -1) {
-              tasks.splice(index, 1);
-            }
-          });
+          const proxy = config.useProxy ? await getProxy() : '';
+          const accountWorkDeviceId = await getAccountForWork();
+
+          const cookie = await getDataAccount(accountWorkDeviceId);
+
+          const task = runPythonScript(proxy, cookie, event)
+            .then(async (result) => {
+              if ((result as string).toLowerCase().trim() == 'true') {
+                console.log('true');
+                await addCartOutputAccounts(accountWorkDeviceId);
+              } else {
+                console.log('false', result);
+                await addCartInputAccounts(accountWorkDeviceId);
+              }
+            })
+            .catch(async (result) => {
+              console.log('false error', result);
+              await addCartInputAccounts(accountWorkDeviceId);
+            })
+            .finally(() => {
+              worksCompleted++;
+              const index = tasks.indexOf(task);
+              if (index > -1) {
+                tasks.splice(index, 1);
+              }
+            });
           tasks.push(task);
         }
 

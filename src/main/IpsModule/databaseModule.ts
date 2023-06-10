@@ -3,7 +3,8 @@ import {
   getProxy,
   updateAllProxies,
   updateInputAccounts,
-  getCartAccounts,
+  getCartOutputAccounts,
+  getCartInputAccounts,
 } from '../database/queries/cartQueries';
 import fs from 'fs';
 
@@ -12,8 +13,11 @@ export const databaseModule = (ipcMain: IpcMain) => {
     getProxy();
   });
 
-  ipcMain.handle('get-cart-accounts', async (_event) => {
-    return getCartAccounts();
+  ipcMain.handle('get-cart-output-accounts', async (_event) => {
+    return getCartOutputAccounts();
+  });
+  ipcMain.handle('get-cart-input-accounts', async (_event) => {
+    return getCartInputAccounts();
   });
 
   ipcMain.handle('update-proxy', async (_event, path) => {

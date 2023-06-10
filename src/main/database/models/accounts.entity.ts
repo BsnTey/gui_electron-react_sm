@@ -26,7 +26,7 @@ export class AccountSportmaster extends Model {
   passEmail!: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.TEXT,
     allowNull: false,
   })
   cookie!: string;
@@ -65,6 +65,19 @@ export class AccountSportmaster extends Model {
 
   @Column({
     type: DataType.INTEGER,
+    allowNull: true,
   })
   userId!: number;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+  })
+  createdAt!: string;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+  })
+  updatedAt!: string;
 }

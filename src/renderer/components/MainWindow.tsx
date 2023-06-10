@@ -1,12 +1,9 @@
 import {
-  Select,
   Text,
-  Box,
   Tabs,
   TabList,
   Tab,
   Flex,
-  Input,
   TabPanel,
   TabPanels,
   Button,
@@ -22,11 +19,11 @@ import {
   NumberDecrementStepper,
   useDisclosure,
   useToast,
+  Progress,
 } from '@chakra-ui/react';
 
 import ModalException from './ModalException';
 import React from 'react';
-import { ipcRenderer } from 'electron';
 import { MenuSettings } from './MenuSettings';
 import ModalInputDownload from './ModalInputDownload';
 import ModalOutputSuccess from './ModalOutputSuccess';
@@ -34,7 +31,11 @@ import ModalOutputSuccess from './ModalOutputSuccess';
 const MainWindow = () => {
   const [countWorks, setCountWorks] = React.useState(1);
   const [countThreads, setCountThreads] = React.useState(1);
+  const [progress, setProgress] = React.useState(0);
   const [useProxy, setUseProxy] = React.useState('1');
+  const [disabledRunButton, setDisabledRunButton] = React.useState(false);
+  const deltaProgressRef = React.useRef(0);
+  const progressRef = React.useRef(0);
 
   const {
     isOpen: isOpenException,
@@ -75,8 +76,18 @@ const MainWindow = () => {
     setUseProxy(value);
   };
 
+  const setProgressHandler = React.useCallback(() => {
+    console.log('setProgressHandler progress', progressRef.current);
+    setProgress(deltaProgressRef.current + progressRef.current);
+    progressRef.current += deltaProgressRef.current;
+  }, [countWorks, progress, progressRef.current]);
+
   React.useEffect(() => {
+    console.log('useEffect');
     const updateProgressListener = (_event: any, data: any) => {
+      // console.log('countWorks', countWorks);
+      // console.log('progress', progress);
+      setProgressHandler();
       console.log(_event);
     };
 
@@ -85,16 +96,20 @@ const MainWindow = () => {
       updateProgressListener
     );
 
-    // Очистка на размонтировании компонента
     return () => {
       window.electron.ipcRenderer.removeListener(
         'update-progress',
         updateProgressListener
       );
     };
-  }, []); // Зависимости передаются в массиве вторым аргументом
+  }, []);
 
   const handleRunScript = async () => {
+    setProgress(1);
+    progressRef.current = 0;
+    deltaProgressRef.current = 100 / countWorks;
+
+    setDisabledRunButton(true);
     window.electron.ipcRenderer
       .sendCommandRun('run-python-script', {
         countWorks,
@@ -116,6 +131,10 @@ const MainWindow = () => {
       })
       .catch((error) => {
         console.log('handleRunScript error', error);
+      })
+      .finally(() => {
+        setDisabledRunButton(false);
+        setProgress(100);
       });
   };
 
@@ -222,9 +241,11 @@ const MainWindow = () => {
                   bg: 'blue.500',
                 }}
                 onClick={handleRunScript}
+                isDisabled={disabledRunButton}
               >
                 Запустить
               </Button>
+              <Progress hasStripe mt="5" value={progress} />
             </Stack>
           </TabPanel>
         </TabPanels>

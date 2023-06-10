@@ -16,6 +16,11 @@ import {
   Input,
   useDisclosure,
   useToast,
+  List,
+  ListItem,
+  ListIcon,
+  OrderedList,
+  UnorderedList,
 } from '@chakra-ui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'renderer/redux/store';
@@ -34,29 +39,31 @@ const ModalOutputSuccess: React.FC<IModalOutputSuccessProps> = ({
   const dispatch = useDispatch();
   const toast = useToast();
 
+  const handleOutputAccounts = () => {
+    window.electron.ipcRenderer
+      .invokeGet('get-cart-output-accounts')
+      .then((response) => {
+        setOutputAccounts(
+          response.map((index: any) => index.dataValues.deviceId)
+        );
+        toast({
+          title: `Успешно`,
+          status: 'success',
+          isClosable: true,
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: `Ошибка при обновлении`,
+          status: 'error',
+          isClosable: true,
+        });
+      });
+  };
+
   useEffect(() => {
     if (isOpen) {
-      window.electron.ipcRenderer
-        .invokeGet('get-cart-accounts')
-        .then((response) => {
-          console.log(response);
-          setOutputAccounts(
-            response.map((index: any) => index.dataValues.deviceId)
-          );
-          console.log(outputAccounts);
-          toast({
-            title: `Аккаунты успешно добавлены`,
-            status: 'success',
-            isClosable: true,
-          });
-        })
-        .catch((error) => {
-          toast({
-            title: `Ошибка при обновлении`,
-            status: 'error',
-            isClosable: true,
-          });
-        });
+      handleOutputAccounts();
     }
   }, [isOpen]);
 
@@ -64,16 +71,19 @@ const ModalOutputSuccess: React.FC<IModalOutputSuccessProps> = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        {/* <ModalHeader>Вставьте данные для выполнения</ModalHeader> */}
+        <ModalHeader>Выполненные аккаунты из БД</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Stack spacing={5} p="4" borderWidth="1px" borderRadius="md">
             <Box>
-              <ul>
+              <OrderedList>
                 {outputAccounts.map((account, index) => (
-                  <li key={index}>{account}</li>
+                  <ListItem key={index}>{account}</ListItem>
                 ))}
-              </ul>
+              </OrderedList>
+              <Flex mt="5" gap="5">
+                <Button onClick={handleOutputAccounts}>Обновить Окно</Button>
+              </Flex>
             </Box>
           </Stack>
         </ModalBody>

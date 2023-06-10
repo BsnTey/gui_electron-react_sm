@@ -13,7 +13,8 @@ export type Channels =
   | 'get-proxys'
   | 'update-progress'
   | 'update-input-accounts'
-  | 'get-cart-accounts'
+  | 'get-cart-output-accounts'
+  | 'get-cart-input-accounts'
   | 'update-proxy';
 
 export type ConfigOrder = {
