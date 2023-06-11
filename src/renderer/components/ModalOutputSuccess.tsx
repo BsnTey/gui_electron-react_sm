@@ -61,6 +61,11 @@ const ModalOutputSuccess: React.FC<IModalOutputSuccessProps> = ({
       });
   };
 
+  const handleClearAccounts = () => {
+    window.electron.ipcRenderer.sendCommandStart('clear-cart-output-accounts');
+    handleOutputAccounts();
+  };
+
   useEffect(() => {
     if (isOpen) {
       handleOutputAccounts();
@@ -83,6 +88,7 @@ const ModalOutputSuccess: React.FC<IModalOutputSuccessProps> = ({
               </OrderedList>
               <Flex mt="5" gap="5">
                 <Button onClick={handleOutputAccounts}>Обновить Окно</Button>
+                <Button onClick={handleClearAccounts}>Очистить список</Button>
               </Flex>
             </Box>
           </Stack>

@@ -67,8 +67,11 @@ export const pythonModule = (ipcMain: IpcMain) => {
               if ((result as string).toLowerCase().trim() == 'true') {
                 console.log('true');
                 await addCartOutputAccounts(accountWorkDeviceId);
-              } else {
+              } else if ((result as string).toLowerCase().trim() == 'false') {
                 console.log('false', result);
+                await addCartInputAccounts(accountWorkDeviceId);
+              } else {
+                console.log('else false', result);
                 await addCartInputAccounts(accountWorkDeviceId);
               }
             })

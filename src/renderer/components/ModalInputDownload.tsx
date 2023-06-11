@@ -77,10 +77,12 @@ const ModalInputDownload: React.FC<IModalInputDownloadProps> = ({
           status: 'success',
           isClosable: true,
         });
+        setInputAccounts('');
+        handleInputAccounts();
       })
       .catch((error) => {
         toast({
-          title: `Ошибка при обновлении`,
+          title: `Ошибка при добавлении`,
           status: 'error',
           isClosable: true,
         });

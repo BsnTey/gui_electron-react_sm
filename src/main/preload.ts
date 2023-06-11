@@ -14,6 +14,7 @@ export type Channels =
   | 'update-progress'
   | 'update-input-accounts'
   | 'get-cart-output-accounts'
+  | 'clear-cart-output-accounts'
   | 'get-cart-input-accounts'
   | 'update-proxy';
 
@@ -27,6 +28,9 @@ const electronHandler = {
   ipcRenderer: {
     actionFile(channel: Channels, path: string) {
       ipcRenderer.send(channel, path);
+    },
+    sendCommandStart(channel: Channels) {
+      ipcRenderer.send(channel);
     },
     on(channel: Channels, func: (...args: unknown[]) => void) {
       const subscription = (_event: IpcRendererEvent, ...args: unknown[]) =>

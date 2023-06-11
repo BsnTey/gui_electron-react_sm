@@ -5,6 +5,7 @@ import {
   updateInputAccounts,
   getCartOutputAccounts,
   getCartInputAccounts,
+  destroyOutputAccounts,
 } from '../database/queries/cartQueries';
 import fs from 'fs';
 
@@ -38,5 +39,8 @@ export const databaseModule = (ipcMain: IpcMain) => {
       console.error('Error while updating accounts:', error);
       throw error;
     }
+  });
+  ipcMain.on('clear-cart-output-accounts', async () => {
+    destroyOutputAccounts();
   });
 };

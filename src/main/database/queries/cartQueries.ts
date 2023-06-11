@@ -155,3 +155,14 @@ export const updateInputAccounts = async (updatedData: string) => {
     throw error;
   }
 };
+
+export const destroyOutputAccounts = async () => {
+  try {
+    await CartOut.destroy({
+      truncate: true,
+    });
+  } catch (error) {
+    console.error('Error while updating accounts:', error);
+    throw error;
+  }
+};

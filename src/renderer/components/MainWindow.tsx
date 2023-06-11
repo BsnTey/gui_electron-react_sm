@@ -77,16 +77,12 @@ const MainWindow = () => {
   };
 
   const setProgressHandler = React.useCallback(() => {
-    console.log('setProgressHandler progress', progressRef.current);
     setProgress(deltaProgressRef.current + progressRef.current);
     progressRef.current += deltaProgressRef.current;
   }, [countWorks, progress, progressRef.current]);
 
   React.useEffect(() => {
-    console.log('useEffect');
     const updateProgressListener = (_event: any, data: any) => {
-      // console.log('countWorks', countWorks);
-      // console.log('progress', progress);
       setProgressHandler();
       console.log(_event);
     };
